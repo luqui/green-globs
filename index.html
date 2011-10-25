@@ -49,7 +49,7 @@ var parseFunction = function(str) {
 var plotFunction = function(f, xmin, xmax) {
     cx.strokeStyle = '#a00';
     cx.beginPath();
-    cx.moveTo(XT(minx), YT(f(minx)));
+    cx.moveTo(XT(minx), YT(f(xmin)));
     for (var x = xmin; x <= xmax; x += stepx) {
         cx.lineTo(XT(x), YT(f(x)));
     }
@@ -149,12 +149,30 @@ var runFunction = function(globs, f) {
     t();
 };
 
+var random = function(min,max) {
+    return Math.random() * (max - min) + min;
+};
+
+var globs = [];
+{
+    for (var i = 0; i < 10; i++) {
+        var coords = [Math.round(random(minx, maxx)), Math.round(random(miny, maxy))];
+        if (Math.random() < 0.5) {
+            globs.push(GreenGlob(coords));
+        }
+        else {
+            globs.push(StopGlob(coords));
+        }
+    }
+}
+
 drawAxes();
+drawGlobs(globs);
 
 {
     var plot = function() {
         var f = parseFunction($('.input input').val());
-        runFunction([], f);
+        runFunction(globs, f);
     };
     $('.input button').click(plot);
 
