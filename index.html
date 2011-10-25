@@ -46,41 +46,110 @@ var parseFunction = function(str) {
     return eval('function(x) { return (' + str + ')}');
 };
 
-var plotFunction = function(f) {
+var plotFunction = function(f, xmin, xmax) {
     cx.strokeStyle = '#a00';
     cx.beginPath();
     cx.moveTo(XT(minx), YT(f(minx)));
-    for (var x = minx; x <= maxx; x += stepx) {
+    for (var x = xmin; x <= xmax; x += stepx) {
         cx.lineTo(XT(x), YT(f(x)));
     }
     cx.stroke();
 };
 
-var drawGlobs = function(globs) {
-    cx.save();
-    for (var i = 0; i < globs.length; i++) {
-        var glob = globs[i];
-        
-        if (glob.type == 'green') {
+var atomic = function(f) {
+    return function() {
+        cx.save();
+        f.apply(this, arguments);
+        cx.restore();
+    };
+};
+
+var GreenGlob = function(coords) {
+    return {
+        type: 'green',
+        coords: coords,
+        radius: 0.4,
+        draw: atomic(function() {
             cx.fillStyle = '#0a0';
             cx.beginPath();
-            cx.arc(XT(glob.coords[0]), YT(glob.coords[1]), WT(0.4), 0, 2*Math.PI);
+            cx.arc(XT(this.coords[0]), YT(this.coords[1]), WT(this.radius), 0, 2*Math.PI);
             cx.fill();
-        }
-        else if (glob.type == 'stop') {
+        })
+    };
+};
+
+var PoppedGlob = function(coords) {
+    return {
+        type: 'popped',
+        coords: coords,
+        radius: 0.4,
+        draw: atomic(function() {
+            cx.fillStyle = '#ddd';
+            cx.beginPath();
+            cx.arc(XT(this.coords[0]), YT(this.coords[1]), WT(this.radius), 0, 2*Math.PI);
+            cx.fill();
+        })
+    }
+};
+
+var StopGlob = function(coords) {
+    return {
+        type: 'stop',
+        coords: coords,
+        radius: 0.4,
+        draw: atomic(function() {
             cx.lineWidth = 2;
             cx.strokeStyle = '#00a';
             cx.beginPath();
-            cx.arc(XT(glob.coords[0]), YT(glob.coords[1]), WT(0.4), 0, 2*Math.PI);
+            cx.arc(XT(this.coords[0]), YT(this.coords[1]), WT(this.radius), 0, 2*Math.PI);
             cx.stroke();
-        }
+        })
+    };
+};
+
+var drawGlobs = function(globs) {
+    cx.save();
+    for (var i = 0; i < globs.length; i++) {
+        globs[i].draw();
     }
     cx.restore();
 };
 
-drawAxes();
-drawGlobs([{ type: 'green', coords: [3,4] }, { type: 'stop', coords: [2,5] }]);
-plotFunction(parseFunction('x*Math.sin(2*x)'));
+var stepFunction = function(globs, f, x) {
+    cx.clearRect(0,0,canvas.width,canvas.height);
+    drawAxes();
+    drawGlobs(globs);
+    plotFunction(f, minx, x);
+
+    var y = f(x);
+    for (var i = 0; i < globs.length; i++) {
+        var glob = globs[i];
+        if ((x-glob.coords[0])*(x-glob.coords[0]) + (y-glob.coords[1])*(y-glob.coords[1]) <= glob.radius*glob.radius) { 
+            // hit!
+            if (glob.type == 'stop') { return null; }
+            if (glob.type == 'green') {
+                globs[i] = PoppedGlob(glob.coords);
+            }
+        }
+    }
+    if (x > maxx) { return null; }
+    return function() {
+        return stepFunction(globs, f, x + stepx);
+    };
+};
+
+var runFunction = function(globs, f) {
+    var c = function() { return stepFunction(globs, f, minx) }
+    var t = function() {
+        if (c) {
+            c = c();
+            setTimeout(t, 0);
+        }
+    };
+    t();
+};
+
+runFunction([GreenGlob([3,4]), StopGlob([2,4])], parseFunction('x+2'));
 
 })
 </script>
