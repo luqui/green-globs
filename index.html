@@ -13,8 +13,11 @@ var maxx = 8;
 var miny = -6;
 var maxy = 6;
 var stepx = (maxx - minx) / canvas.width;
-var XT = function(x) { return (x - minx) * canvas.width / (maxx - minx) };
-var YT = function(y) { return canvas.height - (y - miny) * canvas.height / (maxy - miny) };
+
+var WT = function(w) { return w * canvas.width / (maxx - minx) };
+var XT = function(x) { return WT(x - minx) };
+var HT = function(h) { return -h * canvas.height / (maxy - miny) };
+var YT = function(y) { return canvas.height + HT(y - miny) };
 
 var drawAxes = function() {
     cx.stokeStyle = '#000';
@@ -44,7 +47,7 @@ var parseFunction = function(str) {
 };
 
 var plotFunction = function(f) {
-    cx.strokeStyle = '#0a0';
+    cx.strokeStyle = '#a00';
     cx.beginPath();
     cx.moveTo(XT(minx), YT(f(minx)));
     for (var x = minx; x <= maxx; x += stepx) {
@@ -53,7 +56,30 @@ var plotFunction = function(f) {
     cx.stroke();
 };
 
+var drawGlobs = function(globs) {
+    cx.save();
+    for (var i = 0; i < globs.length; i++) {
+        var glob = globs[i];
+        
+        if (glob.type == 'green') {
+            cx.fillStyle = '#0a0';
+            cx.beginPath();
+            cx.arc(XT(glob.coords[0]), YT(glob.coords[1]), WT(0.4), 0, 2*Math.PI);
+            cx.fill();
+        }
+        else if (glob.type == 'stop') {
+            cx.lineWidth = 2;
+            cx.strokeStyle = '#00a';
+            cx.beginPath();
+            cx.arc(XT(glob.coords[0]), YT(glob.coords[1]), WT(0.4), 0, 2*Math.PI);
+            cx.stroke();
+        }
+    }
+    cx.restore();
+};
+
 drawAxes();
+drawGlobs([{ type: 'green', coords: [3,4] }, { type: 'stop', coords: [2,5] }]);
 plotFunction(parseFunction('x*Math.sin(2*x)'));
 
 })
