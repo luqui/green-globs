@@ -20,7 +20,7 @@ var HT = function(h) { return -h * canvas.height / (maxy - miny) };
 var YT = function(y) { return canvas.height + HT(y - miny) };
 
 var drawAxes = function() {
-    cx.stokeStyle = '#000';
+    cx.strokeStyle = '#000';
     cx.beginPath();
     cx.moveTo(XT(minx), YT(0));
     cx.lineTo(XT(maxx), YT(0));
@@ -149,12 +149,31 @@ var runFunction = function(globs, f) {
     t();
 };
 
-runFunction([GreenGlob([3,4]), StopGlob([2,4])], parseFunction('x+2'));
+drawAxes();
+
+{
+    var plot = function() {
+        var f = parseFunction($('.input input').val());
+        runFunction([], f);
+    };
+    $('.input button').click(plot);
+
+    $('.input input').keydown(function(e) {
+        if (e.keyCode == 13) { plot(); }
+    });
+}
 
 })
 </script>
 
 <style>
+.input {
+  width: 640px;
+  font-size: 20pt;
+}
+.input * {
+  font-size: 20pt;
+}
 </style>
 
 </head>
@@ -162,5 +181,9 @@ runFunction([GreenGlob([3,4]), StopGlob([2,4])], parseFunction('x+2'));
  <canvas id="canvas" width="640" height="480"> 
   Canvas not supported.  Use Firefox or Chrome, kthxbye.
  </canvas>
+ <div class="input">
+   y = <input type="text" />
+   <button>Fire</button>
+ </div>
 </body>
 </html>
