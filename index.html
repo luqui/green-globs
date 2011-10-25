@@ -1,0 +1,71 @@
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+
+<script>
+$(function() {
+
+var canvas = $('#canvas')[0];
+var cx = canvas.getContext('2d');
+
+var minx = -8;
+var maxx = 8;
+var miny = -6;
+var maxy = 6;
+var stepx = (maxx - minx) / canvas.width;
+var XT = function(x) { return (x - minx) * canvas.width / (maxx - minx) };
+var YT = function(y) { return canvas.height - (y - miny) * canvas.height / (maxy - miny) };
+
+var drawAxes = function() {
+    cx.stokeStyle = '#000';
+    cx.beginPath();
+    cx.moveTo(XT(minx), YT(0));
+    cx.lineTo(XT(maxx), YT(0));
+    cx.moveTo(XT(0), YT(miny));
+    cx.lineTo(XT(0), YT(maxy));
+    cx.stroke();
+
+    cx.strokeStyle = '#ddd';
+    cx.beginPath();
+    for (var x = minx; x <= maxx; x += 1) {
+        cx.moveTo(XT(x), YT(miny));
+        cx.lineTo(XT(x), YT(maxy));
+    }
+    
+    for (var y = miny; y <= maxy; y += 1) {
+        cx.moveTo(XT(minx), YT(y));
+        cx.lineTo(XT(maxx), YT(y));
+    }
+    cx.stroke();
+};
+
+var parseFunction = function(str) {
+    return eval('function(x) { return (' + str + ')}');
+};
+
+var plotFunction = function(f) {
+    cx.strokeStyle = '#0a0';
+    cx.beginPath();
+    cx.moveTo(XT(minx), YT(f(minx)));
+    for (var x = minx; x <= maxx; x += stepx) {
+        cx.lineTo(XT(x), YT(f(x)));
+    }
+    cx.stroke();
+};
+
+drawAxes();
+plotFunction(parseFunction('x*Math.sin(2*x)'));
+
+})
+</script>
+
+<style>
+</style>
+
+</head>
+<body>
+ <canvas id="canvas" width="640" height="480"> 
+  Canvas not supported.  Use Firefox or Chrome, kthxbye.
+ </canvas>
+</body>
+</html>
