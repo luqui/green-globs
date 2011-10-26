@@ -155,14 +155,13 @@ var random = function(min,max) {
 
 var globs = [];
 {
-    for (var i = 0; i < 10; i++) {
-        var coords = [Math.round(random(minx, maxx)), Math.round(random(miny, maxy))];
-        if (Math.random() < 0.5) {
-            globs.push(GreenGlob(coords));
-        }
-        else {
-            globs.push(StopGlob(coords));
-        }
+    for (var i = 0; i < 6; i++) {
+        var coords = [Math.round(random(minx+1, maxx-1)), Math.round(random(miny+1, maxy-1))];
+        globs.push(GreenGlob(coords));
+    }
+    for (var i = 0; i < 4; i++) {
+        var coords = [Math.round(random(minx+1, maxx-1)), Math.round(random(miny+1, maxy-1))];
+        globs.push(StopGlob(coords));
     }
 }
 
@@ -196,12 +195,12 @@ drawGlobs(globs);
 
 </head>
 <body>
- <canvas id="canvas" width="640" height="480"> 
-  Canvas not supported.  Use Firefox or Chrome, kthxbye.
- </canvas>
- <div class="input">
-   y = <input type="text" />
-   <button>Fire</button>
- </div>
+  <canvas id="canvas" width="640" height="480"> 
+   Canvas not supported.  Use Firefox or Chrome, kthxbye.
+  </canvas>
+  <div class="input">
+    y = <input type="text" />
+    <button>Fire</button>
+  </div>
 </body>
 </html>
