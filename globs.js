@@ -69,7 +69,9 @@ $$.drawAxes = function() {
 };
 
 $$.parse = function(str) {
-    return eval('(function(x) { return (' + str + ')})');
+    with(Math) {
+        return eval('(function(x) { return (' + str + ')})');
+    }
 };
 
 $$.plot = atomic(function(f, xmin, xmax) {
