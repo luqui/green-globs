@@ -12,7 +12,9 @@ var minx = -8;
 var maxx = 8;
 var miny = -6;
 var maxy = 6;
-var stepx = (maxx - minx) / canvas.width;
+var draw_stepx    = (maxx - minx) / canvas.width;
+var animate_stepx = 10 * draw_stepx;
+var check_stepx   = draw_stepx / 5;
 
 var WT = function(w) { return w * canvas.width / (maxx - minx) };
 var XT = function(x) { return WT(x - minx) };
@@ -50,7 +52,7 @@ var plotFunction = function(f, xmin, xmax) {
     cx.strokeStyle = '#a00';
     cx.beginPath();
     cx.moveTo(XT(minx), YT(f(xmin)));
-    for (var x = xmin; x <= xmax; x += stepx) {
+    for (var x = xmin; x <= xmax; x += draw_stepx) {
         cx.lineTo(XT(x), YT(f(x)));
     }
     cx.stroke();
@@ -121,20 +123,24 @@ var stepFunction = function(globs, f, x) {
     drawGlobs(globs);
     plotFunction(f, minx, x);
 
-    var y = f(x);
-    for (var i = 0; i < globs.length; i++) {
-        var glob = globs[i];
-        if ((x-glob.coords[0])*(x-glob.coords[0]) + (y-glob.coords[1])*(y-glob.coords[1]) <= glob.radius*glob.radius) { 
-            // hit!
-            if (glob.type == 'stop') { return null; }
-            if (glob.type == 'green') {
-                globs[i] = PoppedGlob(glob.coords);
+    var targetx = x + animate_stepx;
+    while (x < targetx) {
+        var y = f(x);
+        for (var i = 0; i < globs.length; i++) {
+            var glob = globs[i];
+            if ((x-glob.coords[0])*(x-glob.coords[0]) + (y-glob.coords[1])*(y-glob.coords[1]) <= glob.radius*glob.radius) { 
+                // hit!
+                if (glob.type == 'stop') { return null; }
+                if (glob.type == 'green') {
+                    globs[i] = PoppedGlob(glob.coords);
+                }
             }
         }
+        x += check_stepx;
     }
-    if (x > maxx) { return null; }
+    if (targetx > maxx) { return; }
     return function() {
-        return stepFunction(globs, f, x + stepx);
+        return stepFunction(globs, f, targetx);
     };
 };
 
@@ -143,7 +149,7 @@ var runFunction = function(globs, f) {
     var t = function() {
         if (c) {
             c = c();
-            setTimeout(t, 0);
+            setTimeout(t, 20);
         }
     };
     t();
