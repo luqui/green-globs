@@ -24,13 +24,17 @@ var globs = [];
     }
 }
 
+var state = Globs.newState(globs, function(s) {
+    $('#score').text(s.score);
+});
+
 Globs.drawAxes();
-Globs.drawGlobs(globs);
+Globs.drawGlobs(state.globs);
 
 {
     var plot = function() {
         var f = Globs.parse($('.input input').val());
-        Globs.run(globs, f);
+        Globs.run(state, f);
     };
     $('.input button').click(plot);
 
@@ -50,10 +54,19 @@ Globs.drawGlobs(globs);
 .input * {
   font-size: 20pt;
 }
+.score {
+  font-size: 20pt;
+}
+.score #score {
+  color: red;
+}
 </style>
 
 </head>
 <body>
+  <div class="score">
+   Score: <span id="score">0</span>
+  </div>
   <canvas id="canvas" width="640" height="480"> 
    Canvas not supported.  Use Firefox or Chrome, kthxbye.
   </canvas>

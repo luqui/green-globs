@@ -72,15 +72,16 @@ $$.parse = function(str) {
     return eval('(function(x) { return (' + str + ')})');
 };
 
-$$.plot = function(f, xmin, xmax) {
+$$.plot = atomic(function(f, xmin, xmax) {
     cx.strokeStyle = '#a00';
+    cx.lineWidth = 4;
     cx.beginPath();
     cx.moveTo(XT(minx), YT(f(xmin)));
     for (var x = xmin; x <= xmax; x += draw_stepx) {
         cx.lineTo(XT(x), YT(f(x)));
     }
     cx.stroke();
-};
+});
 
 $$.GreenGlob = function(coords) {
     return {
@@ -131,6 +132,17 @@ $$.drawGlobs = atomic(function(globs) {
     }
 });
 
+var floatText = function(coords, text, font, fillStyle) {
+    var cb = atomic(function(x,y,a) {
+        if (a < 0) { return; }
+        cx.font = font;
+        cx.fillStyle = fillStyle;
+        cx.fillText(text, x, y);
+        setTimeout(function() { cb(x,y-1,a-0.05) }, 20);
+    });
+    cb(XT(coords[0]), YT(coords[1]), 1);
+};
+
 var plotFull = function(globs, f, minx, maxx) {
     cx.clearRect(0,0,canvas.width,canvas.height);
     $$.drawAxes();
@@ -138,22 +150,26 @@ var plotFull = function(globs, f, minx, maxx) {
     $$.plot(f, minx, maxx);
 };
 
-var stepFunction = function(globs, f, x) {
-    plotFull(globs, f, minx, x);
+var stepFunction = function(state, f, x, incscore) {
+    plotFull(state.globs, f, minx, x);
 
     var targetx = x + animate_stepx;
     while (x < targetx) {
         var y = f(x);
-        for (var i = 0; i < globs.length; i++) {
-            var glob = globs[i];
+        for (var i = 0; i < state.globs.length; i++) {
+            var glob = state.globs[i];
             if ((x-glob.coords[0])*(x-glob.coords[0]) + (y-glob.coords[1])*(y-glob.coords[1]) <= glob.radius*glob.radius) { 
                 // hit!
                 if (glob.type == 'stop') { 
-                    plotFull(globs, f, minx, x);
+                    plotFull(state.globs, f, minx, x);
                     return null; 
                 }
                 if (glob.type == 'green') {
-                    globs[i] = $$.PoppedGlob(glob.coords);
+                    state.globs[i] = $$.PoppedGlob(glob.coords);
+                    floatText(glob.coords, incscore, "20px serif", "Red");
+                    state.score += incscore;
+                    state.modify();
+                    incscore++;
                 }
             }
         }
@@ -161,16 +177,25 @@ var stepFunction = function(globs, f, x) {
     }
     if (targetx > maxx) { return; }
     return function() {
-        return stepFunction(globs, f, targetx);
+        return stepFunction(state, f, targetx, incscore);
     };
 };
 
-$$.run = function(globs, f) {
-    var c = function() { return stepFunction(globs, f, minx) }
+$$.newState = function(globs, cb) {
+    var state = {
+        globs: globs,
+        score: 0,
+        modify: function() { cb(state) }
+    };
+    return state;
+};
+
+$$.run = function(state, f) {
+    var c = function() { return stepFunction(state, f, minx, 1) }
     var t = function() {
         if (c) {
             c = c();
-            setTimeout(t, 20);
+            setTimeout(t, 40);
         }
     };
     t();
