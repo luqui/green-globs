@@ -1,159 +1,12 @@
 <html>
 <head>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+<script src="globs.js"></script>
 
 <script>
 $(function() {
 
-var canvas = $('#canvas')[0];
-var cx = canvas.getContext('2d');
-
-var minx = -8;
-var maxx = 8;
-var miny = -6;
-var maxy = 6;
-var draw_stepx    = (maxx - minx) / canvas.width;
-var animate_stepx = 10 * draw_stepx;
-var check_stepx   = draw_stepx / 5;
-
-var WT = function(w) { return w * canvas.width / (maxx - minx) };
-var XT = function(x) { return WT(x - minx) };
-var HT = function(h) { return -h * canvas.height / (maxy - miny) };
-var YT = function(y) { return canvas.height + HT(y - miny) };
-
-var drawAxes = function() {
-    cx.strokeStyle = '#000';
-    cx.beginPath();
-    cx.moveTo(XT(minx), YT(0));
-    cx.lineTo(XT(maxx), YT(0));
-    cx.moveTo(XT(0), YT(miny));
-    cx.lineTo(XT(0), YT(maxy));
-    cx.stroke();
-
-    cx.strokeStyle = '#ddd';
-    cx.beginPath();
-    for (var x = minx; x <= maxx; x += 1) {
-        cx.moveTo(XT(x), YT(miny));
-        cx.lineTo(XT(x), YT(maxy));
-    }
-    
-    for (var y = miny; y <= maxy; y += 1) {
-        cx.moveTo(XT(minx), YT(y));
-        cx.lineTo(XT(maxx), YT(y));
-    }
-    cx.stroke();
-};
-
-var parseFunction = function(str) {
-    return eval('function(x) { return (' + str + ')}');
-};
-
-var plotFunction = function(f, xmin, xmax) {
-    cx.strokeStyle = '#a00';
-    cx.beginPath();
-    cx.moveTo(XT(minx), YT(f(xmin)));
-    for (var x = xmin; x <= xmax; x += draw_stepx) {
-        cx.lineTo(XT(x), YT(f(x)));
-    }
-    cx.stroke();
-};
-
-var atomic = function(f) {
-    return function() {
-        cx.save();
-        f.apply(this, arguments);
-        cx.restore();
-    };
-};
-
-var GreenGlob = function(coords) {
-    return {
-        type: 'green',
-        coords: coords,
-        radius: 0.4,
-        draw: atomic(function() {
-            cx.fillStyle = '#0a0';
-            cx.beginPath();
-            cx.arc(XT(this.coords[0]), YT(this.coords[1]), WT(this.radius), 0, 2*Math.PI);
-            cx.fill();
-        })
-    };
-};
-
-var PoppedGlob = function(coords) {
-    return {
-        type: 'popped',
-        coords: coords,
-        radius: 0.4,
-        draw: atomic(function() {
-            cx.fillStyle = '#ddd';
-            cx.beginPath();
-            cx.arc(XT(this.coords[0]), YT(this.coords[1]), WT(this.radius), 0, 2*Math.PI);
-            cx.fill();
-        })
-    }
-};
-
-var StopGlob = function(coords) {
-    return {
-        type: 'stop',
-        coords: coords,
-        radius: 0.4,
-        draw: atomic(function() {
-            cx.lineWidth = 2;
-            cx.strokeStyle = '#00a';
-            cx.beginPath();
-            cx.arc(XT(this.coords[0]), YT(this.coords[1]), WT(this.radius), 0, 2*Math.PI);
-            cx.stroke();
-        })
-    };
-};
-
-var drawGlobs = function(globs) {
-    cx.save();
-    for (var i = 0; i < globs.length; i++) {
-        globs[i].draw();
-    }
-    cx.restore();
-};
-
-var stepFunction = function(globs, f, x) {
-    cx.clearRect(0,0,canvas.width,canvas.height);
-    drawAxes();
-    drawGlobs(globs);
-    plotFunction(f, minx, x);
-
-    var targetx = x + animate_stepx;
-    while (x < targetx) {
-        var y = f(x);
-        for (var i = 0; i < globs.length; i++) {
-            var glob = globs[i];
-            if ((x-glob.coords[0])*(x-glob.coords[0]) + (y-glob.coords[1])*(y-glob.coords[1]) <= glob.radius*glob.radius) { 
-                // hit!
-                if (glob.type == 'stop') { return null; }
-                if (glob.type == 'green') {
-                    globs[i] = PoppedGlob(glob.coords);
-                }
-            }
-        }
-        x += check_stepx;
-    }
-    if (targetx > maxx) { return; }
-    return function() {
-        return stepFunction(globs, f, targetx);
-    };
-};
-
-var runFunction = function(globs, f) {
-    var c = function() { return stepFunction(globs, f, minx) }
-    var t = function() {
-        if (c) {
-            c = c();
-            setTimeout(t, 20);
-        }
-    };
-    t();
-};
+var Globs = GlobsModule(jQuery, $('#canvas')[0], {});
 
 var random = function(min,max) {
     return Math.random() * (max - min) + min;
@@ -162,22 +15,22 @@ var random = function(min,max) {
 var globs = [];
 {
     for (var i = 0; i < 6; i++) {
-        var coords = [Math.round(random(minx+1, maxx-1)), Math.round(random(miny+1, maxy-1))];
-        globs.push(GreenGlob(coords));
+        var coords = [Math.round(random(Globs.minx+1, Globs.maxx-1)), Math.round(random(Globs.miny+1, Globs.maxy-1))];
+        globs.push(Globs.GreenGlob(coords));
     }
     for (var i = 0; i < 4; i++) {
-        var coords = [Math.round(random(minx+1, maxx-1)), Math.round(random(miny+1, maxy-1))];
-        globs.push(StopGlob(coords));
+        var coords = [Math.round(random(Globs.minx+1, Globs.maxx-1)), Math.round(random(Globs.miny+1, Globs.maxy-1))];
+        globs.push(Globs.StopGlob(coords));
     }
 }
 
-drawAxes();
-drawGlobs(globs);
+Globs.drawAxes();
+Globs.drawGlobs(globs);
 
 {
     var plot = function() {
-        var f = parseFunction($('.input input').val());
-        runFunction(globs, f);
+        var f = Globs.parse($('.input input').val());
+        Globs.run(globs, f);
     };
     $('.input button').click(plot);
 
