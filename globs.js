@@ -145,8 +145,12 @@ var floatText = function(coords, text, font, fillStyle) {
     cb(XT(coords[0]), YT(coords[1]), 1);
 };
 
-var plotFull = function(globs, f, minx, maxx) {
+$$.clearScreen = function() {
     cx.clearRect(0,0,canvas.width,canvas.height);
+};
+
+var plotFull = function(globs, f, minx, maxx) {
+    $$.clearScreen();
     $$.drawAxes();
     $$.drawGlobs(globs);
     $$.plot(f, minx, maxx);

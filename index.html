@@ -2,46 +2,39 @@
 <head>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
 <script src="globs.js"></script>
+<script src="levels.js"></script>
 
 <script>
 $(function() {
 
 var Globs = GlobsModule(jQuery, $('#canvas')[0], {});
+var Levels = LevelsModule(Globs);
 
-var random = function(min,max) {
-    return Math.random() * (max - min) + min;
+var current_level = 0;
+
+var state;
+var start_level = function() {
+    state = Globs.newState(Levels.levels[current_level](), function(s) {
+        $('#score').text(s.score);
+    });
+    Globs.clearScreen();
+    Globs.drawAxes();
+    Globs.drawGlobs(state.globs);
 };
 
-var globs = [];
-{
-    for (var i = 0; i < 6; i++) {
-        var coords = [Math.round(random(Globs.minx+1, Globs.maxx-1)), Math.round(random(Globs.miny+1, Globs.maxy-1))];
-        globs.push(Globs.GreenGlob(coords));
-    }
-    for (var i = 0; i < 4; i++) {
-        var coords = [Math.round(random(Globs.minx+1, Globs.maxx-1)), Math.round(random(Globs.miny+1, Globs.maxy-1))];
-        globs.push(Globs.StopGlob(coords));
-    }
-}
+start_level(0);
 
-var state = Globs.newState(globs, function(s) {
-    $('#score').text(s.score);
+var plot = function() {
+    var f = Globs.parse($('.input input').val());
+    Globs.run(state, f);
+};
+$('.input button').click(plot);
+
+$('.input input').keydown(function(e) {
+    if (e.keyCode == 13) { plot(); }
 });
 
-Globs.drawAxes();
-Globs.drawGlobs(state.globs);
-
-{
-    var plot = function() {
-        var f = Globs.parse($('.input input').val());
-        Globs.run(state, f);
-    };
-    $('.input button').click(plot);
-
-    $('.input input').keydown(function(e) {
-        if (e.keyCode == 13) { plot(); }
-    });
-}
+$('#retry').click(start_level);
 
 })
 </script>
@@ -54,18 +47,30 @@ Globs.drawGlobs(state.globs);
 .input * {
   font-size: 20pt;
 }
-.score {
+.header {
   font-size: 20pt;
+  width: 640px;
 }
-.score #score {
+#score {
   color: red;
+}
+.score {
+  float: left;
+}
+.levelcontrols {
+  float: right;
 }
 </style>
 
 </head>
 <body>
-  <div class="score">
-   Score: <span id="score">0</span>
+  <div class="header">
+   <div class="score">Score: <span name="score" id="score">0</span></div>
+   <div class="levelcontrols">
+    <button name="retry" id="retry">Retry</button>
+    <button name="next" id="next">Next Level</button>
+   </div>
+  </table>
   </div>
   <canvas id="canvas" width="640" height="480"> 
    Canvas not supported.  Use Firefox or Chrome, kthxbye.
