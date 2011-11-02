@@ -3,7 +3,7 @@ LevelsModule = function(Globs) {
 $$ = {};
 
 var level1 = {
-    required_score: 12,
+    required_score: 10,
     globs: function() {
         return [ 
             new Globs.GreenGlob([-3, -3]),
@@ -17,7 +17,7 @@ var level1 = {
 };
 
 var level2 = {
-    required_score: 12,
+    required_score: 10,
     globs: function() {
         return [
             new Globs.GreenGlob([-2, -4]),
@@ -31,7 +31,7 @@ var level2 = {
 };
 
 var level3 = {
-    required_score: 12,
+    required_score: 10,
     globs: function() {
         return [
             new Globs.GreenGlob([-4, -2]),
@@ -45,7 +45,7 @@ var level3 = {
 };
 
 var level4 = {
-    required_score: 15,
+    required_score: 10,
     globs: function() {
         return [
             new Globs.GreenGlob([ 0,  0]),
@@ -59,7 +59,7 @@ var level4 = {
 };
 
 var level5 = {
-    required_score: 15,
+    required_score: 10,
     globs: function() {
         return [
             new Globs.GreenGlob([ 0, -3]),
@@ -72,7 +72,7 @@ var level5 = {
 };
 
 var level6 = {
-    required_score: 15,
+    required_score: 10,
     globs: function() {
         return [
             new Globs.GreenGlob([2, 0]),
@@ -87,7 +87,7 @@ var level6 = {
 };
 
 var level7 = {
-    required_score: 15,
+    required_score: 10,
     globs: function() {
         return [
             new Globs.GreenGlob([ 0,  0]),
@@ -100,7 +100,7 @@ var level7 = {
 };
 
 var level8 = {
-    required_score: 15,
+    required_score: 10,
     globs: function() {
         return [
             new Globs.GreenGlob([ 0, 0]),
@@ -113,7 +113,7 @@ var level8 = {
 };
 
 var level9 = {
-    required_score: 15,
+    required_score: 10,
     globs: function() {
         return [
             new Globs.GreenGlob([ 0, 2]),
@@ -126,7 +126,7 @@ var level9 = {
 };
 
 var level10 = {
-    required_score: 21,
+    required_score: 15,
     globs: function() {
         return [
             new Globs.GreenGlob([ 1, -0.5]),
