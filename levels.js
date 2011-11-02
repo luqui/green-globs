@@ -54,7 +54,8 @@ var level4 = {
             new Globs.GreenGlob([-2,  4]),
             new Globs.GreenGlob([ 2,  4])
         ]
-    }
+    },
+    hint: 'Try multiplying x by itself'
 };
 
 var level5 = {
@@ -80,7 +81,9 @@ var level6 = {
             new Globs.GreenGlob([0, 4]),
             new Globs.GreenGlob([4, 4])
         ]
-    }
+    },
+    hint: '<i>x*x</i> can also be written <i>sqr(x)</i>.  So a more complicated thing multiplied by '
+       + 'itself like <i>(x+5)*(x+5)</i> can be written <i>sqr(x+5)</i>.  Try it!'
 };
 
 var level7 = {

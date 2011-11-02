@@ -16,13 +16,18 @@ $('button:disabled').removeAttr('disabled');
 
 var state;
 var start_level = function() {
+    var level = Levels.levels[current_level];
     $('.levelno').text("Level " + (current_level+1));
+
+    if (level.hint) { $('.hint').html(level.hint) }
+    else { $('.hint').html('') }
+
     $('#score').text(0);
     $('#next').attr('disabled', 'disabled');
-    $('#next').text("Next Level (" + Levels.levels[current_level].required_score + ")");
-    state = Globs.newState(Levels.levels[current_level].globs(), function(s) {
+    $('#next').text("Next Level (" + level.required_score + ")");
+    state = Globs.newState(level.globs(), function(s) {
         $('#score').text(s.score);
-        if (s.score >= Levels.levels[current_level].required_score) {
+        if (s.score >= level.required_score) {
             $('#next').removeAttr('disabled');
         }
     });
@@ -46,13 +51,18 @@ var plot = function() {
 $('.input button').click(plot);
 
 $('.input input').keydown(function(e) {
-    if (e.keyCode == 13) { $('.input button').click(); }
+    if (e.keyCode == 13) { $('.input button:enabled').click(); }
 });
 
 $('#retry').click(start_level);
 $('#next').click(function() {
-    current_level++;
-    start_level();
+    if (current_level+1 < Levels.levels.length) {
+        current_level++;
+        start_level();
+    }
+    else {
+        alert("You won the game.  w00t!!");
+    }
 });
 
 })
@@ -81,6 +91,10 @@ button.nav {
   text-decoration: underline;
   margin-bottom: 20px;
 }
+.hint {
+  font-size: 14pt;
+  color: #88f;
+}
 </style>
 
 </head>
@@ -103,6 +117,7 @@ button.nav {
      y = <input type="text" />
      <button>Fire</button>
    </div>
+   <div class="hint"></div>
   </div>
  <center>
 </body>
