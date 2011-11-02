@@ -12,6 +12,8 @@ var Levels = LevelsModule(Globs);
 
 var current_level = 0;
 
+$('button:disabled').removeAttr('disabled');
+
 var state;
 var start_level = function() {
     $('.levelno').text("Level " + (current_level+1));
@@ -33,12 +35,18 @@ start_level(0);
 
 var plot = function() {
     var f = Globs.parse($('.input input').val());
-    Globs.run(state, f);
+    if (f) {
+        var enableds = $('button:enabled');
+        enableds.attr('disabled', 'disabled');
+        Globs.run(state, f, function() {
+            enableds.removeAttr('disabled');
+        });
+    }
 };
 $('.input button').click(plot);
 
 $('.input input').keydown(function(e) {
-    if (e.keyCode == 13) { plot(); }
+    if (e.keyCode == 13) { $('.input button').click(); }
 });
 
 $('#retry').click(start_level);

@@ -69,8 +69,16 @@ $$.drawAxes = function() {
 };
 
 $$.parse = function(str) {
-    with(Math) {
-        return eval('(function(x) { return (' + str + ')})');
+    try {
+        with(Math) {
+            var sqr = function(x) { return x*x };
+            var f = eval('(function(x) { return (' + str + ')})');
+            f(0);
+        }
+        return f;
+    }
+    catch (e) {
+        alert(e);
     }
 };
 
@@ -156,7 +164,7 @@ var plotFull = function(globs, f, minx, maxx) {
     $$.plot(f, minx, maxx);
 };
 
-var stepFunction = function(state, f, x, incscore) {
+var stepFunction = function(state, f, x, incscore, callback) {
     plotFull(state.globs, f, minx, x);
 
     var targetx = x + animate_stepx;
@@ -168,7 +176,8 @@ var stepFunction = function(state, f, x, incscore) {
                 // hit!
                 if (glob.type == 'stop') { 
                     plotFull(state.globs, f, minx, x);
-                    return null; 
+                    callback(false);
+                    return;
                 }
                 if (glob.type == 'green') {
                     state.globs[i] = $$.PoppedGlob(glob.coords);
@@ -181,9 +190,9 @@ var stepFunction = function(state, f, x, incscore) {
         }
         x += check_stepx;
     }
-    if (targetx > maxx) { return; }
+    if (targetx > maxx) { callback(true); return; }
     return function() {
-        return stepFunction(state, f, targetx, incscore);
+        return stepFunction(state, f, targetx, incscore, callback);
     };
 };
 
@@ -196,8 +205,8 @@ $$.newState = function(globs, cb) {
     return state;
 };
 
-$$.run = function(state, f) {
-    var c = function() { return stepFunction(state, f, minx, 1) }
+$$.run = function(state, f, callback) {
+    var c = function() { return stepFunction(state, f, minx, 1, callback) }
     var t = function() {
         if (c) {
             c = c();
