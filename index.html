@@ -14,8 +14,10 @@ var current_level = 0;
 
 var state;
 var start_level = function() {
+    $('.levelno').text("Level " + (current_level+1));
     $('#score').text(0);
     $('#next').attr('disabled', 'disabled');
+    $('#next').text("Next Level (" + Levels.levels[current_level].required_score + ")");
     state = Globs.newState(Levels.levels[current_level].globs(), function(s) {
         $('#score').text(s.score);
         if (s.score >= Levels.levels[current_level].required_score) {
@@ -49,16 +51,14 @@ $('#next').click(function() {
 </script>
 
 <style>
-.input {
+.game {
   width: 640px;
+}
+.game * {
   font-size: 20pt;
 }
-.input * {
-  font-size: 20pt;
-}
-.header {
-  font-size: 20pt;
-  width: 640px;
+button.nav {
+  font-size: 15pt;
 }
 #score {
   color: red;
@@ -69,24 +69,33 @@ $('#next').click(function() {
 .levelcontrols {
   float: right;
 }
+.levelno {
+  text-decoration: underline;
+  margin-bottom: 20px;
+}
 </style>
 
 </head>
 <body>
-  <div class="header">
-   <div class="score">Score: <span name="score" id="score">0</span></div>
-   <div class="levelcontrols">
-    <button name="retry" id="retry">Retry</button>
-    <button name="next" id="next">Next Level</button>
+ <center>
+  <div class="game">
+   <div class="levelno"></div>
+   <div class="header">
+    <div class="score">Score: <span name="score" id="score">0</span></div>
+    <div class="levelcontrols">
+     <button class="nav" name="retry" id="retry">Retry</button>
+     <button class="nav" name="next" id="next">Next Level</button>
+    </div>
+   </table>
    </div>
-  </table>
+   <canvas id="canvas" width="640" height="480"> 
+    Canvas not supported.  Use Firefox or Chrome, kthxbye.
+   </canvas>
+   <div class="input">
+     y = <input type="text" />
+     <button>Fire</button>
+   </div>
   </div>
-  <canvas id="canvas" width="640" height="480"> 
-   Canvas not supported.  Use Firefox or Chrome, kthxbye.
-  </canvas>
-  <div class="input">
-    y = <input type="text" />
-    <button>Fire</button>
-  </div>
+ <center>
 </body>
 </html>
