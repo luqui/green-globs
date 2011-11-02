@@ -14,8 +14,13 @@ var current_level = 0;
 
 var state;
 var start_level = function() {
-    state = Globs.newState(Levels.levels[current_level](), function(s) {
+    $('#score').text(0);
+    $('#next').attr('disabled', 'disabled');
+    state = Globs.newState(Levels.levels[current_level].globs(), function(s) {
         $('#score').text(s.score);
+        if (s.score >= Levels.levels[current_level].required_score) {
+            $('#next').removeAttr('disabled');
+        }
     });
     Globs.clearScreen();
     Globs.drawAxes();
@@ -35,6 +40,10 @@ $('.input input').keydown(function(e) {
 });
 
 $('#retry').click(start_level);
+$('#next').click(function() {
+    current_level++;
+    start_level();
+});
 
 })
 </script>
